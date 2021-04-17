@@ -8,11 +8,14 @@ const particleImages = [
 ];
 
 export const commands = {
-  /*
-  jump: {
+  shoot: {
     input: ['keyboard.Z', 'gamepad.A'],
+    cooldown: 200,
   },
-  */
+
+  jump: {
+    input: ['keyboard.X', 'gamepad.B'],
+  },
 
   up: {
     input: ['keyboard.UP', 'gamepad.UP'],
@@ -78,6 +81,15 @@ export const shaderColorFragments = null;
 export const propSpecs = {
   ...builtinPropSpecs(commands, shaderCoordFragments, shaderColorFragments),
 
+  'physics.drag': [0.1, 0, 1],
+
+  'player.facingLeft': [false, null],
+
+  'gun.cooldown': [200, 0, 10000],
+  'gun.speed': [200, 0, 10000],
+
+  'jump.velocity': [200, 0, 10000],
+  'jump.base_gravity': [2000, 0, 10000],
 };
 
 export const tileDefinitions = {
