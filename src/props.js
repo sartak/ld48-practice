@@ -4,7 +4,7 @@ import {
 } from './scaffolding/lib/props';
 
 const particleImages = [
-  '',
+  'spritePlayer',
 ];
 
 export const commands = {
@@ -84,16 +84,41 @@ export const propSpecs = {
   'physics.drag': [0.1, 0, 1],
 
   'player.facingLeft': [false, null],
+  'player.speed': [20, 0, 10000],
 
   'gun.cooldown': [200, 0, 10000],
   'gun.speed': [200, 0, 10000],
 
   'jump.velocity': [200, 0, 10000],
   'jump.base_gravity': [2000, 0, 10000],
+
+  'effects.exitSpark.particles': [{
+    image: 'spritePlayer',
+    speed: 20,
+    scaleX: 1,
+    scaleY: 1,
+    alpha: 0.2,
+    quantity: 6,
+    frequency: 3000,
+    lifespan: 5000,
+    preemit: true,
+  }],
 };
 
 export const tileDefinitions = {
   '.': null, // background
+  '@': null, // player
+  '*': {
+    image: 'tileWall',
+    group: 'wall',
+    isStatic: true,
+    combine: true,
+  },
+  '#': {
+    group: 'wall',
+    isStatic: true,
+    combine: '*',
+  },
 };
 
 preprocessPropSpecs(propSpecs, particleImages);

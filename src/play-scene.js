@@ -43,14 +43,32 @@ export default class PlayScene extends SuperScene {
 
   create(config) {
     super.create(config);
-    this.player = this.physics.add.sprite(this.game.config.width / 2, this.game.config.height - 40, 'spritePlayer');
+    this.createLevel('intro');
+    this.player = this.createPlayer();
+    this.setupPhysics();
+    this.particleSystem('effects.exitSpark', {x: 200, y: 200});
+  }
+
+  createPlayer() {
+    const {level} = this;
+    const tile = level.mapLookups['@'][0];
+    const [x, y] = this.positionToScreenCoordinateHalf(tile.x, tile.y);
+    const player = this.physics.add.sprite(x, y, 'spritePlayer');
+    tile.object = player;
+    return player;
   }
 
   setupAnimations() {
   }
 
+  setupPhysics() {
+    const {level, physics, player} = this;
+    const {groups} = level;
+    physics.add.collider(player, groups.wall.group);
+  }
+
   processInput(time, dt) {
-    const {command} = this;
+    const {command, player} = this;
 
     let dx = 0;
     let stickInput = false;
@@ -79,20 +97,26 @@ export default class PlayScene extends SuperScene {
       dx = 1 * dx < 0 ? -1 : 1;
     }
 
-    this.player.setVelocityX(this.player.body.velocity.x + (dx * dt));
+    player.setVelocityX(player.body.velocity.x + (dx * prop('player.speed')));
 
     if (dx < 0) {
-      this.player.facingLeft = true;
+      player.facingLeft = true;
     } else if (dx > 0) {
-      this.player.facingLeft = false;
+      player.facingLeft = false;
     }
 
     if (command.shoot.held) {
       this.shootGun();
     }
 
-    if (command.jump.held) {
-      this.jump();
+    if (player.body.touching.down) {
+      player.isJumping = false;
+    }
+
+    if (player.body.touching.down && command.jump.held && !player.isJumping) {
+      this.beginJump();
+    } else if (player.isJumping && command.jump.held) {
+      this.continueJump();
     }
   }
 
@@ -109,7 +133,13 @@ export default class PlayScene extends SuperScene {
     bullet.body.allowGravity = false;
   }
 
-  jump() {
+  beginJump() {
+    const {player} = this;
+    player.setVelocityY(-prop('jump.velocity'));
+    player.isJumping = true;
+  }
+
+  continueJump() {
     const {player} = this;
     player.setVelocityY(-prop('jump.velocity'));
   }
@@ -119,8 +149,10 @@ export default class PlayScene extends SuperScene {
 
     this.physics.world.gravity.y = prop('jump.base_gravity');
 
-    this.player.setVelocityX(this.player.body.velocity.x * (1 - prop('physics.drag')));
-    this.player.setVelocityY(this.player.body.velocity.y * (1 - prop('physics.drag')));
+    // still pretty terrible but eh
+    const drag = prop('physics.drag') ** (1 / this.timeScale);
+    this.player.setDrag(drag, drag);
+    this.player.body.useDamping = true;
   }
 
   launchTimeSight() {
