@@ -105,6 +105,10 @@ export const propSpecs = {
   }],
 };
 
+propSpecs['physics.drag'][0] = 0.88;
+propSpecs['gun.cooldown'][0] = 400;
+propSpecs['jump.velocity'][0] = 1590.5492631835343;
+
 export const tileDefinitions = {
   '.': null, // background
   '@': null, // player
